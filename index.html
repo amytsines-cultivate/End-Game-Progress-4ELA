@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Over Perfection</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 40px 20px; 
+            background-color: #f0f2f5; 
+            color: #333;
+        }
+        .header-container { text-align: center; margin-bottom: 30px; }
+        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 1px; color: #1a1a1a; }
+        h1 span { font-weight: 300; color: #666; } /* "over" */
+        .subtitle { font-size: 1.1rem; color: #28a745; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
+
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            width: 100%; 
+            max-width: 700px; 
+        }
+        .input-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-bottom: 25px; 
+        }
+        .field { display: flex; flex-direction: column; }
+        label { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #666; }
+        input { 
+            padding: 10px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 6px; 
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus { outline: none; border-color: #007bff; }
+        
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background: #222; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 1rem; 
+            font-weight: bold;
+            cursor: pointer; 
+            transition: background 0.3s;
+        }
+        button:hover { background: #444; }
+        canvas { margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="header-container">
+    <h1>PROGRESS <span>over</span> PERFECTION</h1>
+    <div class="subtitle">5th Grade ELA Data</div>
+</div>
+
+<div class="container">
+    <div class="input-grid">
+        <div class="field">
+            <label>GOLD TARGET (Projection)</label>
+            <input type="number" id="goal" value="100">
+        </div>
+        <div class="field">
+            <label>QUARTER 1</label>
+            <input type="number" id="qt1" value="30">
+        </div>
+        <div class="field">
+            <label>QUARTER 2</label>
+            <input type="number" id="qt2" value="65">
+        </div>
+        <div class="field">
+            <label>QUARTER 3</label>
+            <input type="number" id="qt3" value="85">
+        </div>
+    </div>
+    
+    <button onclick="updateChart()">Update Graph</button>
+    
+    <canvas id="myChart"></canvas>
+</div>
+
+<script>
+    let myChart;
+
+    function updateChart() {
+        const goal = document.getElementById('goal').value;
+        const qt1 = document.getElementById('qt1').value;
+        const qt2 = document.getElementById('qt2').value;
+        const qt3 = document.getElementById('qt3').value;
+        
+        // Static goal lines
+        const orangeGoal = 36;
+        const greenGoal = 48;
+        const purpleGoal = 60;
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+
+        if (myChart) { myChart.destroy(); }
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Quarter 1', 'Quarter 2', 'Quarter 3'],
+                datasets: [
+                    {
+                        label: 'Trend',
+                        data: [qt1, qt2, qt3],
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderWidth: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        tension: 0.2,
+                        zIndex: 10
+                    },
+                    {
+                        label: 'Above (60)',
+                        data: [purpleGoal, purpleGoal, purpleGoal], 
+                        borderColor: '#6f42c1', // Purple
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'At (48)',
+                        data: [greenGoal, greenGoal, greenGoal], 
+                        borderColor: '#28a745', // Green
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'Near (36)',
+                        data: [orangeGoal, orangeGoal, orangeGoal], 
+                        borderColor: '#fd7e14', // Orange
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'Projection',
+                        data: [goal, goal, goal], 
+                        borderColor: '#FFD700', // Gold
+                        borderDash: [5, 5], 
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { 
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        max: 100, // Explicitly limit the top of the graph to 100
+                        grid: { color: '#f0f0f0' }
+                    },
+                    x: { grid: { display: false } }
+                },
+                // Prevents data lines from drawing above the 100 mark if input exceeds it
+                clip: true 
+            }
+        });
+    }
+
+    // Initialize
+    updateChart();
+</script>
+
+</body>
+</html>
